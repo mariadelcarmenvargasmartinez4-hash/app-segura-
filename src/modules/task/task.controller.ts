@@ -1,49 +1,38 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, ParseIntPipe, HttpException } from '@nestjs/common';
 import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
+import { UpdateTaskDto } from './dto/update-task.dto';
 
 @Controller('api/task')
 export class TaskController {
-  constructor(private taskSvc: TaskService) {}
-
-  @Get()
-  @Get(':id')
-  public listTaskById(@Param("id", parseIntPipe) id: String): promise<Talk>{
-    const result = await this.taskSvc.getTaskById(parseInt(id));
-    
-    if (result == undefined) 
-      throw new HttpException('Tarea con ID ${id }no encontrada', HttpStatus.NOT_FOUND);
-    return result
-  }
+  constructor(private readonly taskService: TaskService) {}
 
   @Post()
-  public async insertTask(@Body() task: CreateTaskDto): Promise<Task> {
-    const result = this.taskSvc.insertTask(task);
-    if (result == undefined)
-      throw new HttpException('tarea no registrda', HttpStatus.INTERNAL_SERVER_ERROR);
-   
-    return result;
+  async createTask(@Body() task: CreateTaskDto) {
+    return this.taskService.createTask(task);
+  }
+
+  @Get()
+  async getAllTasks() {
+    return this.taskService.getAllTasks();
+  }
+
+  @Get(':id')
+  async getTaskById(@Param('id', ParseIntPipe) id: number) {
+    return this.taskService.getTaskById(id);
+  }
+
+  @Put(':id')
+  async updateTask(@Param('id', ParseIntPipe) id: number, @Body() task: UpdateTaskDto) {
+    return this.taskService.updateTask(id, task);
   }
 
   @Delete(':id')
-  public deleteTask(@Param("id", ParseIntPipe) id: number): promise<boolean> {
-    const result = await this.taskSvc.deleteTask(id);
-    if (!result)
-      throw new HttpException('tarea con ID ${id} no encontrada', HttpStatus.NOT_FOUND);
-    return result;
-  }
-
-  @Put(":id")
-  public async updatetalk(@Param("id", ParseIntPipe) id: number , @Body() task: UpdateTaskDto): Promise<any> {
-    return this.taskSvc.updatetalk(id, task);
-  }
-
-  @Get(':id')
-  public async listTaskById(@Param('id') id: String): Promise<any> {
-    const result = await this.taskSvc.listTaskById(parseInt(id));
-
-    if (result == undefined) 
-      throw new HttpException('Tarea con ID ${id }no encontrada', HttpStatus.NOT_FOUND);
-    return this.taskSvc.listarTalkById(Number(id));
+  public async deleteTask(@Param('id', ParseIntPipe) id: number) promise<boolean> {
+    try {      await this.taskService.deleteTask(id);
+    } catch (error){
+      throw new HttpException('Task not found', 404);
+        }   
+    return true;
   }
 }
