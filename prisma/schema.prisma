@@ -10,16 +10,16 @@ generator client {
 
 datasource db {
   provider = "postgresql"
- url      = env("DATABASE_URL")
+
 }
 
 model User {
   id       Int    @id @default(autoincrement())
   name     String @db.VarChar(200)
   lastname String @db.VarChar(300)
-  username String @db.VarChar(100)
+  username String @db.VarChar(100)  @unique
   password String
-
+  refreshToken String?
   tasks Task[]
 }
 

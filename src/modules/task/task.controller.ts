@@ -38,13 +38,15 @@ export class TaskController {
 
   // Crear tarea
   @Post()
-  public async createTask(@Body() taskData: CreateTaskDto): Promise<Task> {
-    try {
-      return await this.taskService.createTask(taskData);
-    } catch (error) {
-      throw new HttpException('Failed to create task', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+public async createTask(@Body() taskData: CreateTaskDto): Promise<Task> {
+  try {
+    console.log(taskData);
+    return await this.taskService.createTask(taskData);
+  } catch (error) {
+    console.log(error);
+    throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
   }
+}
 
   // Actualizar tarea
   @Put(':id')
