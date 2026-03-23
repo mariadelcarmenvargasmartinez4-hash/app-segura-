@@ -1,29 +1,29 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto } from './dto/login.dto';
+import { AuthGuard } from 'src/common/guards/auth.guardas';
 
 @Controller('api/auth')
 export class AuthController {
-
-  constructor(private authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post('login')
-  login(@Body() dto: LoginDto) {
-
-    return this.authService.login(
-      dto.username,
-      dto.password
-    );
-
+  async login(
+    @Body() body: { username: string; password: string },
+  ) {
+    return this.authService.login(body.username, body.password);
   }
+
   @Post('refresh')
-refresh(@Body() body: any) {
+  async refresh(
+    @Body() body: { refreshToken: string },
+  ) {
+    return this.authService.refresh(body.refreshToken);
+  }
 
-  return this.authService.refreshToken(
-    body.userId,
-    body.refreshToken,
-  );
-
-}
-
+  // 🔒 Endpoint de prueba para validar guard
+  @UseGuards(AuthGuard)
+  @Post('me')
+  getProfile(@Req() req: any) {
+    return req.user;
+  }
 }

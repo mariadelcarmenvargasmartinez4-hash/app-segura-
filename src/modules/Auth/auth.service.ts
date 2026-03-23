@@ -1,78 +1,73 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { PrismaService } from '../../common/services/prisma.service';
-import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
-
+import { PrismaService } from 'src/common/services/prisma.service';
+//import { UtilService } from 'src/common/services/util.service';
+import { UtilService } from 'src/common/services/util.services';
 @Injectable()
 export class AuthService {
-
   constructor(
     private prisma: PrismaService,
-    private jwtService: JwtService,
+    private utilSvc: UtilService,
   ) {}
 
- async login(username: string, password: string) {
+  async login(username: string, password: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { username },
+    });
 
-  const user = await this.prisma.user.findUnique({
-    where: { username },
-  });
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
 
-  if (!user)
-    throw new UnauthorizedException('Credenciales inválidas');
+    const isValid = await this.utilSvc.checkPassword(
+      password,
+      user.password,
+    );
 
-  const passwordValid = await bcrypt.compare(password, user.password);
+    if (!isValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
 
-  if (!passwordValid)
-    throw new UnauthorizedException('Credenciales inválidas');
+    const payload = {
+      id: user.id,
+      username: user.username,
+    };
 
-  const payload = {
-    sub: user.id,
-    username: user.username,
-  };
+    const accessToken = await this.utilSvc.generateJWT(payload, '60s');
+    const refreshToken = await this.utilSvc.generateJWT(payload, '7d');
 
-  const accessToken = this.jwtService.sign(payload, {
-    expiresIn: '60s',
-  });
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { refreshToken },
+    });
 
-  const refreshToken = this.jwtService.sign(payload, {
-    expiresIn: '7d',
-  });
+    return {
+      accessToken,
+      refreshToken,
+    };
+  }
 
-  await this.prisma.user.update({
-    where: { id: user.id },
-    data: { refreshToken },
-  });
+  async refresh(refreshToken: string) {
+    try {
+      const payload = await this.utilSvc.getPayload(refreshToken);
 
-  return {
-    access_token: accessToken,
-    refresh_token: refreshToken,
-  };
-}
+      const user = await this.prisma.user.findUnique({
+        where: { id: payload.id },
+      });
 
-  async refreshToken(userId: number, refreshToken: string) {
+      if (!user || user.refreshToken !== refreshToken) {
+        throw new UnauthorizedException();
+      }
 
-  const user = await this.prisma.user.findUnique({
-    where: { id: userId },
-  });
+      const newPayload = {
+        id: user.id,
+        username: user.username,
+      };
 
-  if (!user)
-    throw new UnauthorizedException('Usuario no válido');
+      const accessToken = await this.utilSvc.generateJWT(newPayload, '60s');
 
-  if (user.refreshToken !== refreshToken)
-    throw new UnauthorizedException('Refresh token inválido');
-
-  const payload = {
-    sub: user.id,
-    username: user.username,
-  };
-
-  const newAccessToken = this.jwtService.sign(payload, {
-    expiresIn: '60s',
-  });
-
-  return {
-    access_token: newAccessToken,
-  };
-}
-
+      return { accessToken };
+    } catch {
+      throw new UnauthorizedException('Invalid refresh token');
+    }
+  }
 }
