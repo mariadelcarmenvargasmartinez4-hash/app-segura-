@@ -5,8 +5,11 @@ import { AuthController } from './auth.controller';
 import { PrismaModule } from '../../common/services/prisma.module';
 //import { JwtStrategy } from './jwt.strategy';
 import { JwtStrategy } from './jwt.strategy';
+import { CommonModule } from 'src/common/common.module';
+import { UserModule } from '../user/user.module';
+
 @Module({
-  imports: [
+  imports: [CommonModule, UserModule,
     PrismaModule,
     JwtModule.register({
       secret: 'SECRET_KEY',

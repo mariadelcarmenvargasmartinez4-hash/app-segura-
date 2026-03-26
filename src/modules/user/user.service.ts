@@ -31,34 +31,50 @@ export class UserService {
     return user;
   }
 
+  //  AGREGADO (para login)
+  async getUserByUsername(username: string): Promise<User | null> {
+    return this.prisma.user.findUnique({
+      where: { username }
+    });
+  }
+
+  //  ALIAS para tu controller (insertUser)
+  async insertUser(data: CreateUserDto): Promise<User> {
+    return this.createUser(data);
+  }
+
+  //método original (lo mantenemos)
   async createUser(data: CreateUserDto): Promise<User> {
     return this.prisma.user.create({
       data
     });
   }
 
-  async updateUser(id: number, data: UpdateUserDto): Promise<User> {
-
+  async updateUser(id: number, data: UpdateUserDto | any): Promise<User> {
     try {
       return await this.prisma.user.update({
         where: { id },
         data
       });
-
     } catch {
       throw new NotFoundException(`User with id ${id} not found`);
     }
   }
 
   async deleteUser(id: number): Promise<User> {
-
     try {
       return await this.prisma.user.delete({
         where: { id }
       });
-
     } catch {
       throw new NotFoundException(`User with id ${id} not found`);
     }
+  }
+
+  //  AGREGADO (para validar tareas antes de borrar)
+  async getTasksByUserId(userId: number) {
+    return this.prisma.task.findMany({
+      where: { user_id: userId }
+    });
   }
 }

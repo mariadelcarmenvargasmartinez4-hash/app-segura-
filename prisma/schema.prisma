@@ -19,6 +19,7 @@ model User {
   lastname String @db.VarChar(300)
   username String @db.VarChar(100)  @unique
   password String
+  hash   String? @db.Text
   refreshToken String?
   tasks Task[]
 }
