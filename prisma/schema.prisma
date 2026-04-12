@@ -22,6 +22,7 @@ model User {
   hash   String? @db.Text
   refreshToken String?
   tasks Task[]
+  logs Logs[]
 }
 
 model Task {
@@ -32,4 +33,16 @@ model Task {
 
   user_id Int
   user    User @relation(fields: [user_id], references: [id])
+}
+
+model Logs {
+  id Int @id @default(autoincrement())
+  statusCode Int
+  timestamp DateTime
+  path String
+  error String
+  errorCode String
+  userId Int?
+
+  user User? @relation(fields: [userId], references: [id])
 }

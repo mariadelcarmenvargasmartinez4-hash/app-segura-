@@ -1,14 +1,17 @@
 
-import {Body,Controller,Post,Get,Patch,Delete,Param,ParseIntPipe,HttpException,HttpStatus,UseGuards, ForbiddenException, HttpCode} from '@nestjs/common';
+import {
+  Body, Controller, Post, Get, Patch, Delete, Param,
+  ParseIntPipe, HttpException, HttpStatus, UseGuards,
+  ForbiddenException, HttpCode, Req, Request
+} from '@nestjs/common';
 
-import { AuthGuard } from 'src/common/guards/auth.guardas'; 
+import { AuthGuard } from 'src/common/guards/auth.guardas';
 
 import { UserService } from '../user/user.service';
 import { UtilService } from 'src/common/services/util.services';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { UpdateUserDto } from '../user/dto/update-user.dto';
 import { User } from '@prisma/client';
-import { get } from 'node:http';
 
 
 @Controller('api/auth')
@@ -25,22 +28,49 @@ export class AuthController {
     return await this.userSvc.getAllUsers();
   }
 
-  @Get{"/me"}
+  @Get("/me")
   @UseGuards(AuthGuard)
   public getProfile(@Request() request: any) {
+    return request.user;
   } 
 
-  @Post{"/refresh"}
+  @Post("/refresh")
   @UseGuards(AuthGuard)
-  public refreshToken(@Req() request: any) {
+  public async refreshToken(@Req() request: any) {
     //obtener el ususrio en sesion
-    const sessionUser = request ['user'];
-    cosnt user = await this.userSvc.getUserById(sessionUser.id);
-    if(!user || !user.hash) throw new ForbiddenException("Token invalido");{ 
+    const sessionUser = request['user'];
 
-    const user = request.user;
+    const user = await this.userSvc.getUserById(sessionUser.id);
+
+    if (!user || !user.hash) {
+      throw new ForbiddenException("Token invalido");
+    }
+
+    const refreshToken = request.headers['authorization']?.replace('Bearer ', '');
+
+    if (!refreshToken) {
+      throw new ForbiddenException("Refresh token requerido");
+    }
+
     //comparrar el token recibidos con el token guardado
+    const isMatch = await this.utilSvc.compareHash(refreshToken, user.hash);
+
+    if (!isMatch) {
+      throw new ForbiddenException("Token invalido");
+    }
+
     // si el token es valido se genere nuevos token 
+    const newAccessToken = await this.utilSvc.generateToken({ id: user.id });
+    const newRefreshToken = await this.utilSvc.generateToken({ id: user.id });
+
+    //guardar nuevo refresh token hasheado
+    const newHash = await this.utilSvc.hashPassword(newRefreshToken);
+    await this.userSvc.updateUser(user.id, { hash: newHash });
+
+    return {
+      access_token: newAccessToken,
+      refresh_token: newRefreshToken
+    };
   }
 
 
@@ -51,7 +81,9 @@ export class AuthController {
   ): Promise<User> {
 
     const result = await this.userSvc.getUserById(id);
-    const hash = await this.utilSvc.hashPassword(refreshToken);//hash del refresh token
+
+    //hash del refresh token
+    // const hash = await this.utilSvc.hashPassword(refreshToken);
     //return refrsh_token: hash
 
     if (result == undefined) {
@@ -137,12 +169,11 @@ export class AuthController {
     return true;
   }
 
-  @Post{"/logout"}
+  @Post("/logout")
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(AuthGuard)
   public async logout(@Req() request: any) {
-    const sessionUser = request ['user'];
+    const sessionUser = request['user'];
     await this.userSvc.updateUser(sessionUser.id, { hash: null });
   } 
 }
-
