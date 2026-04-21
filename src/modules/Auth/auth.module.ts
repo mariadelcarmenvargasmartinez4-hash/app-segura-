@@ -5,7 +5,8 @@ import { AuthController } from './auth.controller';
 import { PrismaModule } from '../../common/services/prisma.module';
 //import { JwtStrategy } from './jwt.strategy';
 import { JwtStrategy } from './jwt.strategy';
-import { CommonModule } from 'src/common/common.module';
+//import { CommonModule } from 'src/common/common.module';
+import { CommonModule } from '../../common/common.module';
 import { UserModule } from '../user/user.module';
 
 @Module({
@@ -13,7 +14,7 @@ import { UserModule } from '../user/user.module';
     PrismaModule,
     JwtModule.register({
       secret: 'SECRET_KEY',
-      signOptions: { expiresIn: '60s' }, // access token
+      signOptions: { expiresIn: '15m' }, // access token 60s para pruebas, 15m se presente al profe
     }),
   ],
   providers: [AuthService, JwtStrategy],

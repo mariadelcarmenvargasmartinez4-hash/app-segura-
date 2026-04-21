@@ -1,9 +1,11 @@
 
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 //import { UserService } from '../user/user.service';
-import { UtilService } from 'src/common/services/util.services';
-import { PrismaService } from 'src/common/services/prisma.service';
+//import { UtilService } from 'src/common/services/util.services';
+//import { PrismaService } from 'src/common/services/prisma.service';
 ///
+import { UtilService } from '../../common/services/util.services';
+import { PrismaService } from '../../common/services/prisma.service';
 
 import { User } from '@prisma/client';
 
@@ -13,7 +15,7 @@ import { UpdateUserDto } from '../user/dto/update-user.dto';
 @Injectable()
 export class AuthService{
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService, private readonly utilSvc: UtilService) {}
 
   async getAllUsers(): Promise<User[]> {
     return this.prisma.user.findMany();
@@ -29,16 +31,18 @@ export class AuthService{
   }
 
   //  ESTE TAMBIÉN
-  async insertUser(data: CreateUserDto): Promise<User> {
-    return this.prisma.user.create({
-      data: {
-        name: data.name,
-        lastname: data.lastname,
-        username: data.username,
-        password: data.password
-      }
-    });
-  }
+ async insertUser(data: CreateUserDto): Promise<User> {
+  const hashed = await this.utilSvc.hashPassword(data.password);
+
+  return this.prisma.user.create({
+    data: {
+      name: data.name,
+      lastname: data.lastname,
+      username: data.username,
+      password: hashed,
+    }
+  });
+}
 
   async updateUser(id: number, data: any): Promise<User> {
     return this.prisma.user.update({

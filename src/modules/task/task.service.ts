@@ -13,7 +13,11 @@ export class TaskService {
     const tasks = await this.prisma.task.findMany();
     return tasks;
   }
-
+getTasksByUser(userId: number) {
+  return this.prisma.task.findMany({
+    where: { user_id: userId }
+  });
+}
   // Obtener tarea por ID
   public async getTaskById(id: number): Promise<Task> {
     const task = await this.prisma.task.findUnique({
@@ -24,12 +28,15 @@ export class TaskService {
   }
 
   // Insertar nueva tarea
-  public async createTask(data: CreateTaskDto): Promise<Task> {
-    const task = await this.prisma.task.create({
-      data,
-    });
-    return task;
-  }
+ public async createTask(
+  data: CreateTaskDto & { user_id: number }
+): Promise<Task> {
+  const task = await this.prisma.task.create({
+    data,
+  });
+
+  return task;
+}
 
   // Actualizar tarea
   public async updateTask(id: number, data: UpdateTaskDto): Promise<Task> {

@@ -1,4 +1,4 @@
-import { IsOptional, IsString, MinLength, MaxLength } from "class-validator";
+import { IsOptional, IsString, MinLength, MaxLength, Matches } from "class-validator";
 
 export class UpdateUserDto {
 
@@ -24,6 +24,17 @@ export class UpdateUserDto {
   @IsString({ message: 'password debe ser una cadena de texto' })
   @MinLength(4, { message: 'password debe tener al menos 4 caracteres' })
   @MaxLength(100, { message: 'password no debe exceder 100 caracteres' })
-  password?: string;
+  @Matches(/^\S+$/, {
+    message: 'La contraseña no debe contener espacios'
+  })
+    @Matches(
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/,
+    {
+      message:
+        'La contraseña debe tener mayúscula, minúscula, número y símbolo',
+    }
+  )
+    password !: string;
+ 
 
 }

@@ -4,6 +4,7 @@ import { JwtModule } from '@nestjs/jwt'; //  IMPORTANTE
 //import { UtilService } from './services/util.service';
 import { PrismaService } from './services/prisma.service';
 import { UtilService } from './services/util.services';
+import { LogsService } from './services/logs.service';
 
 @Module({
   imports: [
@@ -12,7 +13,7 @@ import { UtilService } from './services/util.services';
       signOptions: { expiresIn: '60s' },
     }),
   ],
-  providers: [UtilService, PrismaService],
-  exports: [UtilService, PrismaService], // 🔥 CLAVE
+  providers: [UtilService, PrismaService,LogsService],
+  exports: [UtilService, PrismaService,UtilService,LogsService], // 
 })
 export class CommonModule {}
