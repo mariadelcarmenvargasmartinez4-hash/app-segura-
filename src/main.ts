@@ -2,7 +2,7 @@ import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { All, ValidationPipe } from '@nestjs/common';
-import { AppException } from './common/filters/http-exception.filters';
+import { AllExceptionsFilter} from './common/filters/http-exception.filters';
 //import * as cookieParser from 'cookie-parser';
 // Swagger
 import helmet from 'helmet';
@@ -30,7 +30,8 @@ app.use(helmet({
 
   //uso de filtros globales
   //app.useGlobalFilters(new AllExceptionfilter());
- app.useGlobalFilters(new AppException());
+ app.useGlobalFilters(new AllExceptionsFilter());
+ 
   // activar validaciones DTO
   app.useGlobalPipes(new ValidationPipe({whitelist: true, //  elimina campos extra
     forbidNonWhitelisted: true,}));

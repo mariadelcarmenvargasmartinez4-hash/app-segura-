@@ -32,8 +32,6 @@ export class TaskController {
   }
 
   // AGREGADO (filtrar por usuario logueado)
-  @Get()
-@UseGuards(AuthGuard)
 @Get('me')
 @UseGuards(AuthGuard)
 getMyTasks(@Req() req) {
@@ -96,20 +94,27 @@ public async createTask(
 }
 
   // Actualizar tarea
-  @Put(':id')
-  public async updateTask(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() taskData: UpdateTaskDto,
-  ): Promise<Task> {
-    try {
-      const task = await this.taskService.updateTask(id, taskData);
-      if (!task) throw new NotFoundException(`Task with ID ${id} not found`);
-      return task;
-    } catch (error) {
-      if (error instanceof NotFoundException) throw error;
-      throw new HttpException(`Task with ID ${id} not found`, HttpStatus.NOT_FOUND);
-    }
+ @Put(':id')
+@UseGuards(AuthGuard)
+public async updateTask(
+  @Param('id', ParseIntPipe) id: number,
+  @Body() taskData: UpdateTaskDto,
+  @Req() req
+): Promise<Task> {
+
+  const task = await this.taskService.getTaskById(id);
+
+  if (!task) {
+    throw new NotFoundException(`Task not found`);
   }
+
+  //  VALIDACIÓN DE PROPIETARIO
+  if (task.user_id !== req.user.id) {
+    throw new ForbiddenException('No autorizado');
+  }
+
+  return await this.taskService.updateTask(id, taskData);
+}
 
   // Eliminar tarea
  @Delete(':id')
