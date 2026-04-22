@@ -41,19 +41,27 @@ getMyTasks(@Req() req) {
 
 
   // Obtener tarea por ID
+  // MODIFICACIÓN: SE AGREGÓ VALIDACIÓN DE PROPIETARIO (IDOR)
   @Get(':id')
-  public async getTaskById(@Param('id', ParseIntPipe) id: number): Promise<Task> {
-    try {
-      const task = await this.taskService.getTaskById(id);
-      // Aseguramos que task siempre exista
-      if (!task) throw new NotFoundException(`Task with ID ${id} not found`);
-      return task;
-    } catch (error) {
-      // Convertimos cualquier error a 404 si es NotFoundException
-      if (error instanceof NotFoundException) throw error;
-      throw new HttpException(`Task with ID ${id} not found`, HttpStatus.NOT_FOUND);
-    }
+@UseGuards(AuthGuard)
+public async getTaskById(
+  @Param('id', ParseIntPipe) id: number,
+  @Req() req
+): Promise<Task> {
+
+  const task = await this.taskService.getTaskById(id);
+
+  if (!task) {
+    throw new NotFoundException('Tarea no encontrada');
   }
+
+  //  VALIDACIÓN IDOR
+  if (task.user_id !== req.user.id) {
+    throw new ForbiddenException('No autorizado');
+  }
+
+  return task;
+}
 
  @Post()
 @UseGuards(AuthGuard)
@@ -94,6 +102,7 @@ public async createTask(
 }
 
   // Actualizar tarea
+  //modificacion: se agregó validación de propietario (IDOR)
  @Put(':id')
 @UseGuards(AuthGuard)
 public async updateTask(
@@ -105,10 +114,10 @@ public async updateTask(
   const task = await this.taskService.getTaskById(id);
 
   if (!task) {
-    throw new NotFoundException(`Task not found`);
+    throw new NotFoundException('Tarea no encontrada');
   }
 
-  //  VALIDACIÓN DE PROPIETARIO
+  //  IDOR
   if (task.user_id !== req.user.id) {
     throw new ForbiddenException('No autorizado');
   }
