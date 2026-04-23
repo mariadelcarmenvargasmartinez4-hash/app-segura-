@@ -5,9 +5,12 @@ import { AuthModule } from './modules/Auth/auth.module';
 import { PostgresProvider } from './common/providers/database.provider';
 import { UserModule } from './modules/user/user.module';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { LogsController } from './common/controllers/logs.controller';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
+    CommonModule,
     AuthModule,
     TaskModule,
     UserModule,

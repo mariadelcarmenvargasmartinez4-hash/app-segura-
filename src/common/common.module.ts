@@ -5,15 +5,18 @@ import { JwtModule } from '@nestjs/jwt'; //  IMPORTANTE
 import { PrismaService } from './services/prisma.service';
 import { UtilService } from './services/util.services';
 import { LogsService } from './services/logs.service';
+import { LogsController } from './controllers/logs.controller';
 
 @Module({
   imports: [
+    
     JwtModule.register({
       secret: 'secretKey', // lo debo  configurar en .env lo hare después
       signOptions: { expiresIn: '60s' },
     }),
   ],
   providers: [UtilService, PrismaService,LogsService],
-  exports: [UtilService, PrismaService,UtilService,LogsService], // 
+  controllers: [LogsController], //  MOVER AQUÍ
+  exports: [UtilService, PrismaService, LogsService], // 
 })
 export class CommonModule {}

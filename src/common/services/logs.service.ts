@@ -19,4 +19,15 @@ export class LogsService {
       },
     });
   }
+  async getAllLogs() {
+  return this.prisma.logs.findMany({
+    orderBy: { timestamp: 'desc' }
+  });
+}
+  async getLogsByUser(userId: number) {
+  return this.prisma.logs.findMany({
+    where: { userId },
+    orderBy: { timestamp: 'desc' }
+  });
+}
 }

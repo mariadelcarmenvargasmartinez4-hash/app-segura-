@@ -8,6 +8,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from '@prisma/client';
 import { AuthGuard } from '../../common/guards/auth.guardas';
 import { LogsService } from '../../common/services/logs.service';
+import { Roles } from '../../common/decorators/roles.decorator';
+import { RolesGuard } from '../../common/guards/roles.guard';
 
 @Controller('api/user')
 export class UserController {
@@ -19,8 +21,9 @@ export class UserController {
   ) {}
 
   //  GET ALL
-  @UseGuards(AuthGuard)
-  @Get()
+  @UseGuards(AuthGuard, RolesGuard)
+@Roles('ADMIN')
+@Get()
   public async getAllUsers(@Req() req): Promise<any[]> {
     try {
       const users = await this.userSvc.getAllUsers();
@@ -83,7 +86,9 @@ export class UserController {
   }
 
   //  CREATE
-  @Post()
+  @UseGuards(AuthGuard, RolesGuard)
+@Roles('ADMIN')
+@Post()
   async createUser(
     @Body() data: CreateUserDto
   ): Promise<User> {
@@ -147,8 +152,9 @@ export class UserController {
   }
 
   //  DELETE
-  @UseGuards(AuthGuard)
-  @Delete(':id')
+  @UseGuards(AuthGuard, RolesGuard)
+@Roles('ADMIN')
+@Delete(':id')
   async deleteUser(
     @Param('id', ParseIntPipe) id: number,
     @Req() req

@@ -15,7 +15,12 @@ export class AuthGuard implements CanActivate {
             throw new UnauthorizedException();
         try {
 const playload = await this.utilSvc.getPayload(token);
-request['user'] = playload;
+//request['user'] = playload; modificacion: se asignan solo campos necesarios a req.user para evitar exponer datos sensibles
+request['user'] = {
+  id: playload.id,
+  username: playload.username,
+  role: playload.role
+};
         }catch{
 throw new UnauthorizedException();
         }
