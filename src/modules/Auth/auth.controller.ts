@@ -204,7 +204,7 @@ public async insertUser(
 
   const encryptedPassword = await this.utilSvc.hashPassword(user.password);
   user.password = encryptedPassword;
-
+  user.role = 'USER';
   const result = await this.userSvc.insertUser(user);
 
   if (!result) {

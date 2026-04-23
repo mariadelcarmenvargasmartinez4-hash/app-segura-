@@ -22,13 +22,13 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsString({ message: 'password debe ser una cadena de texto' })
-  @MinLength(4, { message: 'password debe tener al menos 4 caracteres' })
-  @MaxLength(100, { message: 'password no debe exceder 100 caracteres' })
+  @MinLength(8, { message: 'password debe tener al menos 8 caracteres' })
+  @MaxLength(15, { message: 'password no debe exceder 15 caracteres' })
   @Matches(/^\S+$/, {
     message: 'La contraseña no debe contener espacios'
   })
     @Matches(
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/,
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,15}$/,
     {
       message:
         'La contraseña debe tener mayúscula, minúscula, número y símbolo',
