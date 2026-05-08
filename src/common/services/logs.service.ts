@@ -30,4 +30,29 @@ export class LogsService {
     orderBy: { timestamp: 'desc' }
   });
 }
+// Método para obtener logs con filtros (fecha, usuario, errorCode)
+async getLogs(filters: any) {
+  const { startDate, endDate, userId, errorCode } = filters;
+
+  return this.prisma.logs.findMany({
+    where: {
+      ...(userId && { userId: Number(userId) }),
+      ...(errorCode && { errorCode }),
+      ...(startDate && endDate && {
+        timestamp: {
+          gte: new Date(startDate),
+          lte: new Date(endDate),
+        },
+      }),
+    },
+    orderBy: {
+      timestamp: 'desc',
+    },
+    include: {
+      user: {
+        select: { username: true },
+      },
+    },
+  });
+}
 }

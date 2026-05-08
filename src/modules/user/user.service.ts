@@ -5,6 +5,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from '@prisma/client';
 import { UtilService } from '../../common/services/util.services';
 import { UserResponseDto } from './dto/user-response.dto';
+import { Role } from '@prisma/client';
 
 @Injectable()
 export class UserService {
@@ -51,16 +52,19 @@ return users.map(u => ({
   }
 
   //método original (lo mantenemos)
-  async createUser(data: CreateUserDto): Promise<User> {
-    const hashed = await this.utilSvc.hashPassword(data.password);
+ async createUser(data: CreateUserDto): Promise<User> {
+  const hashed = await this.utilSvc.hashPassword(data.password);
 
-    return this.prisma.user.create({
-      data: {
-        ...data,
-        password: hashed,
-      },
-    });
-  }
+  return this.prisma.user.create({
+    data: {
+      username: data.username,
+      password: hashed,
+      name: data.name,
+      lastname: data.lastname,
+      role: Role.USER
+    },
+  });
+}
 
   async updateUser(id: number, data: UpdateUserDto | any): Promise<User> {
     try {

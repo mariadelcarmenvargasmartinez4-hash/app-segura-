@@ -98,8 +98,8 @@ export class UserController {
       await this.logsService.createLog({
         statusCode: 201,
         path: '/api/user',
-        error: 'CREATE USER',
-        errorCode: 'SUCCESS',
+        error: 'Usuario creado',
+        errorCode: 'USER_CREATED',
       });
 
       return user;
@@ -130,8 +130,8 @@ export class UserController {
       await this.logsService.createLog({
         statusCode: 200,
         path: `/api/user/${id}`,
-        error: 'UPDATE USER',
-        errorCode: 'SUCCESS',
+        error: 'Usuario actualizado',
+        errorCode: 'UPDATE_USER',
         userId: req.user?.id,
       });
 
@@ -165,8 +165,8 @@ export class UserController {
       await this.logsService.createLog({
         statusCode: 200,
         path: `/api/user/${id}`,
-        error: 'DELETE USER',
-        errorCode: 'SUCCESS',
+        error: 'Usuario eliminado',
+        errorCode: 'USER_DELETED',
         userId: req.user?.id,
       });
 

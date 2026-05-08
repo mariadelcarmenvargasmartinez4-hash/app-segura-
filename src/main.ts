@@ -30,11 +30,12 @@ app.use(helmet({
 
   //uso de filtros globales
   //app.useGlobalFilters(new AllExceptionfilter());
- app.useGlobalFilters(new AllExceptionsFilter());
+ //app.useGlobalFilters(new AllExceptionsFilter());
  
   // activar validaciones DTO
   app.useGlobalPipes(new ValidationPipe({whitelist: true, //  elimina campos extra
     forbidNonWhitelisted: true,}));
+    
 
   // configuración de swagger
   const config = new DocumentBuilder()

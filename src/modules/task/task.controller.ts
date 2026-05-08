@@ -79,8 +79,8 @@ public async createTask(
     await this.logsService.createLog({
       statusCode: 201,
       path: '/api/task',
-      error: 'CREATE TASK',
-      errorCode: 'SUCCESS',
+      error: 'Tarea creada',
+      errorCode: 'TASK_CREATED',
       userId: req.user.id,
     });
 
@@ -101,9 +101,7 @@ public async createTask(
   }
 }
 
-  // Actualizar tarea
-  //modificacion: se agregó validación de propietario (IDOR)
- @Put(':id')
+  @Put(':id')
 @UseGuards(AuthGuard)
 public async updateTask(
   @Param('id', ParseIntPipe) id: number,
@@ -122,7 +120,19 @@ public async updateTask(
     throw new ForbiddenException('No autorizado');
   }
 
-  return await this.taskService.updateTask(id, taskData);
+  //  ACTUALIZAR
+  const updatedTask = await this.taskService.updateTask(id, taskData);
+
+  //  LOG (AQUÍ VA)
+  await this.logsService.createLog({
+    statusCode: 200,
+    path: 'task/update',
+    error: 'Tarea actualizada',
+    errorCode: 'TASK_UPDATED',
+    userId: req.user.id, //  ID del usuario que hizo la actualización
+  });
+
+  return updatedTask;
 }
 
   // Eliminar tarea
@@ -150,7 +160,7 @@ async deleteTask(
       statusCode: 200,
       path: `/api/task/${id}`,
       error: 'DELETE TASK',
-      errorCode: 'SUCCESS',
+      errorCode: 'TASK_DELETED',
       userId: req.user.id,
     });
 

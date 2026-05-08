@@ -46,10 +46,18 @@ public async login(@Body() body: any, @Res({ passthrough: true }) response: any)
         errorCode: 'USER_NOT_FOUND',
       });
 
-      throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
+      throw new HttpException(
+  'Credenciales inválidas',
+  HttpStatus.UNAUTHORIZED
+);
     }
+     //  DEBUG
+console.log('USER BD:', user.password);
+console.log('PASSWORD INPUT:', password);
 
     const isMatch = await this.utilSvc.checkPassword(password, user.password);
+    //  DEBUG
+console.log('MATCH:', isMatch);
 
     if (!isMatch) {
       await this.logsService.createLog({
@@ -60,7 +68,10 @@ public async login(@Body() body: any, @Res({ passthrough: true }) response: any)
         userId: user.id,
       });
 
-      throw new HttpException('Contraseña incorrecta', HttpStatus.UNAUTHORIZED);
+      throw new HttpException(
+  'Credenciales inválidas',
+  HttpStatus.UNAUTHORIZED
+);
     }
 
     const payload = { id: user.id, username: user.username , role: user.role,}; //  modificación: se agregó el campo role al payload};
@@ -101,7 +112,10 @@ public async login(@Body() body: any, @Res({ passthrough: true }) response: any)
       errorCode: 'SERVER_ERROR',
     });
 
-    throw error;
+   throw new HttpException(
+  error.message || 'Error en login',
+  error.status || HttpStatus.INTERNAL_SERVER_ERROR
+);//ultima modificacion para enviar el mensaje del error al frontend
   }
 }
   
@@ -185,8 +199,6 @@ public async login(@Body() body: any, @Res({ passthrough: true }) response: any)
 
   
   //  REGISTRO (PUBLICO)
-  
-  @Post()
   // SIN GUARD 
   @Post()
 public async insertUser(
@@ -201,9 +213,9 @@ public async insertUser(
       HttpStatus.CONFLICT
     );
   }
-
-  const encryptedPassword = await this.utilSvc.hashPassword(user.password);
-  user.password = encryptedPassword;
+//prueba registro 
+  //const encryptedPassword = await this.utilSvc.hashPassword(user.password);
+  //user.password = encryptedPassword;
   user.role = 'USER';
   const result = await this.userSvc.insertUser(user);
 

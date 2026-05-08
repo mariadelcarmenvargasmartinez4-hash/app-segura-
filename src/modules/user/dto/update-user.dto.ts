@@ -1,40 +1,120 @@
-import { IsOptional, IsString, MinLength, MaxLength, Matches } from "class-validator";
+import {
+  IsIn,
+  IsOptional,
+  IsString,
+  Matches,
+  MaxLength,
+  MinLength
+} from 'class-validator';
 
 export class UpdateUserDto {
 
+  // NAME
   @IsOptional()
-  @IsString({ message: 'name debe ser una cadena de texto' })
-  @MinLength(2, { message: 'name debe tener al menos 2 caracteres' })
-  @MaxLength(100, { message: 'name no debe exceder 100 caracteres' })
+
+  @IsString({
+    message: 'El nombre debe ser texto'
+  })
+
+  @MinLength(3, {
+    message: 'El nombre debe tener mínimo 3 caracteres'
+  })
+
+  @MaxLength(50, {
+    message: 'El nombre no puede superar 50 caracteres'
+  })
+
+  @Matches(
+    /^[A-Za-zÁÉÍÓÚáéíóúÑñ]+( [A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$/,
+    {
+      message:
+        'El nombre solo permite letras y un espacio entre palabras'
+    }
+  )
   name?: string;
 
+  // LASTNAME
   @IsOptional()
-  @IsString({ message: 'lastname debe ser una cadena de texto' })
-  @MinLength(2, { message: 'lastname debe tener al menos 2 caracteres' })
-  @MaxLength(100, { message: 'lastname no debe exceder 100 caracteres' })
+
+  @IsString({
+    message: 'El apellido debe ser texto'
+  })
+
+  @MinLength(3, {
+    message: 'El apellido debe tener mínimo 3 caracteres'
+  })
+
+  @MaxLength(50, {
+    message: 'El apellido no puede superar 50 caracteres'
+  })
+
+  @Matches(
+    /^[A-Za-zÁÉÍÓÚáéíóúÑñ]+( [A-Za-zÁÉÍÓÚáéíóúÑñ]+)*$/,
+    {
+      message:
+        'El apellido solo permite letras y un espacio entre palabras'
+    }
+  )
   lastname?: string;
 
+  // USERNAME
   @IsOptional()
-  @IsString({ message: 'username debe ser una cadena de texto' })
-  @MinLength(3, { message: 'username debe tener al menos 3 caracteres' })
-  @MaxLength(50, { message: 'username no debe exceder 50 caracteres' })
+
+  @IsString({
+    message: 'El usuario debe ser texto'
+  })
+
+  @MinLength(5, {
+    message: 'El usuario debe tener mínimo 5 caracteres'
+  })
+
+  @MaxLength(20, {
+    message: 'El usuario no puede superar 20 caracteres'
+  })
+
+  @Matches(/^[A-Za-z0-9]+$/, {
+    message:
+      'El usuario solo permite letras y números sin espacios'
+  })
   username?: string;
 
+  // PASSWORD
   @IsOptional()
-  @IsString({ message: 'password debe ser una cadena de texto' })
-  @MinLength(8, { message: 'password debe tener al menos 8 caracteres' })
-  @MaxLength(15, { message: 'password no debe exceder 15 caracteres' })
+
+  @IsString({
+    message: 'La contraseña debe ser texto'
+  })
+
+  @MinLength(8, {
+    message: 'La contraseña debe tener mínimo 8 caracteres'
+  })
+
+  @MaxLength(20, {
+    message: 'La contraseña no puede superar 20 caracteres'
+  })
+
   @Matches(/^\S+$/, {
     message: 'La contraseña no debe contener espacios'
   })
-    @Matches(
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,15}$/,
+
+  @Matches(
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,20}$/,
     {
       message:
-        'La contraseña debe tener mayúscula, minúscula, número y símbolo',
+        'La contraseña debe tener mayúscula, minúscula, número y símbolo'
     }
   )
-    password !: string;
- 
+  password?: string;
 
+  // ROLE (opcional)
+  @IsOptional()
+
+  @IsString({
+    message: 'El rol debe ser texto'
+  })
+
+  @IsIn(['ADMIN', 'USER'], {
+    message: 'Rol inválido'
+  })
+  role?: string;
 }
