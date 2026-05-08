@@ -87,7 +87,7 @@ console.log('MATCH:', isMatch);
       statusCode: 200,
       path: 'auth/login',
       error: 'Login exitoso',
-      errorCode: 'SUCCESS',
+      errorCode: 'LOGIN_SUCCESS',
       userId: user.id,
     });
 
