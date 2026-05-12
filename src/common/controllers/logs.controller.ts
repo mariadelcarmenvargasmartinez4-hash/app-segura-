@@ -21,25 +21,32 @@ export class LogsController {
     @Req() req: any,
     @Query() query: any
   ) {
+
     const user = req.user;
+
+    // PAGINACIÓN
+    const page = parseInt(query.page) || 1;
+    const limit = parseInt(query.limit) || 10;
 
     const filters = {
       userId: query.userId,
       errorCode: query.errorCode,
       startDate: query.startDate,
       endDate: query.endDate,
+      page,
+      limit
     };
 
-    //  ADMIN → puede ver todo con filtros
+    // ADMIN → puede ver todo
     if (user.role === 'ADMIN') {
       return this.logsService.getLogs(filters);
     }
 
-    //  USER → solo SUS logs (ignora userId externo)
+    // USER → solo sus logs
     if (user.role === 'USER') {
       return this.logsService.getLogs({
         ...filters,
-        userId: user.id, //  fuerza seguridad
+        userId: user.id
       });
     }
 
